@@ -174,62 +174,18 @@ void AutomataBoard::SetUnorderedBuffers()
 
 void AutomataBoard::CreateBuffers()
 {
-	D3D12_RESOURCE_DESC buffDesc = {};
-	buffDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	buffDesc.Alignment = 0;
-	buffDesc.Width = board_width * board_height * sizeof(float);
-	buffDesc.Height = 1;
-	buffDesc.MipLevels = 1; 
-	buffDesc.DepthOrArraySize = 1;
-	buffDesc.SampleDesc.Count = 1;
-	buffDesc.Format = DXGI_FORMAT_UNKNOWN;
-	buffDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	buffDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-
-	D3D12_HEAP_PROPERTIES heap_prop_buffers = {};
-	heap_prop_buffers.Type = D3D12_HEAP_TYPE_DEFAULT;
-	heap_prop_buffers.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	heap_prop_buffers.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	heap_prop_buffers.CreationNodeMask = 1;
-	heap_prop_buffers.VisibleNodeMask = 1;
-
-	D3D12_HEAP_PROPERTIES heap_prop_upload_buffer = {};
-	heap_prop_upload_buffer.Type = D3D12_HEAP_TYPE_UPLOAD;
-	heap_prop_upload_buffer.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	heap_prop_upload_buffer.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	heap_prop_upload_buffer.CreationNodeMask = 1;
-	heap_prop_upload_buffer.VisibleNodeMask = 1;
-
 	for (int i = 0; i < BOARD_BUFFER_COUNT; i++)
 	{
-		NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_buffers, D3D12_HEAP_FLAG_NONE,
-			&buffDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&board_buffer[i])))
+		CreateDefaultBuffer(&board_buffer[i], board_width * board_height * sizeof(float), D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 	}
 
-	NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_buffers, D3D12_HEAP_FLAG_NONE,
-		&buffDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&accumulated)))
+	CreateDefaultBuffer(&accumulated, board_width * board_height * sizeof(float), D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+	CreateDefaultBuffer(&kernel_buffer, kernel_width * kernel_height * sizeof(float), D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
-	buffDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-	NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_upload_buffer, D3D12_HEAP_FLAG_NONE,
-		&buffDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&upload_buffer)))
-
-	buffDesc.Width = kernel_width * kernel_height * sizeof(float);
-	NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_upload_buffer, D3D12_HEAP_FLAG_NONE,
-			&buffDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&upload_kernel_buffer)))
-	
-	buffDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-	NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_buffers, D3D12_HEAP_FLAG_NONE,
-			&buffDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&kernel_buffer)))
-
-
-	buffDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-	buffDesc.Width = AlignToConstBuffer(sizeof(ComputeRootConst));
-	NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_upload_buffer, D3D12_HEAP_FLAG_NONE,
-		&buffDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&compute_root_const)))
-	
-	buffDesc.Width = AlignToConstBuffer(sizeof(S_B_ranges));
-	NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_upload_buffer, D3D12_HEAP_FLAG_NONE,
-		&buffDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&survive_birth_ranges)))
+	CreateUploadBuffer(&upload_buffer, board_width * board_height * sizeof(float));
+	CreateUploadBuffer(&upload_kernel_buffer, kernel_width * kernel_height * sizeof(float));
+	CreateUploadBuffer(&compute_root_const, AlignToConstBuffer(sizeof(ComputeRootConst)));
+	CreateUploadBuffer(&survive_birth_ranges, AlignToConstBuffer(sizeof(S_B_ranges)));
 }
 
 void AutomataBoard::BuildComputeRootSignature()

@@ -21,6 +21,10 @@ public:
 	void static Resize(HWND window, void* object);
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
 	D3D12_CPU_DESCRIPTOR_HANDLE CurrentDepthBufferView();
+	void CreateDefaultBuffer(ID3D12Resource** Resource, int size, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+	void CreateUploadBuffer(ID3D12Resource** Resource, int size, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+	ID3D12Resource* CreateDefaultBuffer(int size, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+	ID3D12Resource* CreateUploadBuffer(int size, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 	void Synchronize();
 	virtual ~DeviceResources(){}
 protected:

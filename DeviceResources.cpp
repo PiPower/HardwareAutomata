@@ -149,6 +149,73 @@ D3D12_CPU_DESCRIPTOR_HANDLE DeviceResources::CurrentDepthBufferView()
     return handle;
 }
 
+void DeviceResources::CreateDefaultBuffer(ID3D12Resource** Resource, int size, D3D12_RESOURCE_FLAGS flags)
+{
+    *Resource = CreateDefaultBuffer(size, flags);
+}
+
+void DeviceResources::CreateUploadBuffer(ID3D12Resource** Resource, int size, D3D12_RESOURCE_FLAGS flags)
+{
+    *Resource = CreateUploadBuffer(size, flags);
+}
+
+ID3D12Resource* DeviceResources::CreateDefaultBuffer(int size, D3D12_RESOURCE_FLAGS flags)
+{
+    ID3D12Resource* createdResource;
+
+    D3D12_RESOURCE_DESC buffDesc = {};
+    buffDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    buffDesc.Alignment = 0;
+    buffDesc.Width = size;
+    buffDesc.Height = 1;
+    buffDesc.MipLevels = 1;
+    buffDesc.DepthOrArraySize = 1;
+    buffDesc.SampleDesc.Count = 1;
+    buffDesc.Format = DXGI_FORMAT_UNKNOWN;
+    buffDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    buffDesc.Flags = flags;
+
+    D3D12_HEAP_PROPERTIES heap_prop_buffers = {};
+    heap_prop_buffers.Type = D3D12_HEAP_TYPE_DEFAULT;
+    heap_prop_buffers.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heap_prop_buffers.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heap_prop_buffers.CreationNodeMask = 1;
+    heap_prop_buffers.VisibleNodeMask = 1;
+
+    NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_buffers, D3D12_HEAP_FLAG_NONE,
+        &buffDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&createdResource)))
+        return createdResource;
+}
+
+ID3D12Resource* DeviceResources::CreateUploadBuffer(int size, D3D12_RESOURCE_FLAGS flags)
+{
+    ID3D12Resource* createdResource;
+
+    D3D12_RESOURCE_DESC buffDesc = {};
+    buffDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    buffDesc.Alignment = 0;
+    buffDesc.Width = size;
+    buffDesc.Height = 1;
+    buffDesc.MipLevels = 1;
+    buffDesc.DepthOrArraySize = 1;
+    buffDesc.SampleDesc.Count = 1;
+    buffDesc.Format = DXGI_FORMAT_UNKNOWN;
+    buffDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    buffDesc.Flags = flags;
+
+    D3D12_HEAP_PROPERTIES heap_prop_upload_buffer = {};
+    heap_prop_upload_buffer.Type = D3D12_HEAP_TYPE_UPLOAD;
+    heap_prop_upload_buffer.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heap_prop_upload_buffer.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heap_prop_upload_buffer.CreationNodeMask = 1;
+    heap_prop_upload_buffer.VisibleNodeMask = 1;
+
+    NOT_SUCCEEDED(Device->CreateCommittedResource(&heap_prop_upload_buffer, D3D12_HEAP_FLAG_NONE,
+        &buffDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&createdResource)))
+        return createdResource;
+}
+
+
 void DeviceResources::Resize(HWND hwnd)
 {
     Synchronize();
