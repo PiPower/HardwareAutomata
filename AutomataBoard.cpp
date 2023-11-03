@@ -98,6 +98,17 @@ void AutomataBoard::Resize(HWND hwnd)
 
 void AutomataBoard::Draw()
 {
+	D3D12_RESOURCE_BARRIER barriers[2];
+	barriers[0].Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+	barriers[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barriers[0].UAV.pResource = board_buffer[curr_board_buffer].Get();
+
+	barriers[1].Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+	barriers[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barriers[1].UAV.pResource = accumulated.Get();
+
+
+
 	NOT_SUCCEEDED(CommandAllocator->Reset());
 	NOT_SUCCEEDED(CommandList->Reset(CommandAllocator.Get(), pipeline_ops.Get()));
 
@@ -121,6 +132,7 @@ void AutomataBoard::Draw()
 	CommandList->SetComputeRootConstantBufferView(2, compute_root_const->GetGPUVirtualAddress());
 	CommandList->SetComputeRootConstantBufferView(3, survive_birth_ranges->GetGPUVirtualAddress());
 	CommandList->SetComputeRootUnorderedAccessView(4, accumulated->GetGPUVirtualAddress());
+	CommandList->ResourceBarrier(2, barriers);
 
 	CommandList->Dispatch(meta_data.dispatchX, meta_data.dispatchY, meta_data.dispatchZ);
 	CopyDataTo(renderTargets[current_frame].Get(), screen_texture.Get(), 

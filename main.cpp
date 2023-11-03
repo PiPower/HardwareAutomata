@@ -10,7 +10,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
 {
 	int screen_width = 1000, screen_height = 1000;
 	Window window(screen_width, screen_height, L"Klasa", L"Lenia");
-	AutomataBoard* leniaAutomata = create_game_of_life(window.GetWindowHWND(), 500, 500,2);
+	AutomataBoard* leniaAutomata = create_bugsmovie_automata(window.GetWindowHWND(), 500, 500,2);
 	window.RegisterResizezable(leniaAutomata, DeviceResources::Resize);
 	while (window.ProcessMessages() == 0)
 	{
