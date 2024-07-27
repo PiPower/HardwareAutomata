@@ -132,8 +132,8 @@ void to_image(int3 threadIdx : SV_GroupThreadID, int3 BlockIdx : SV_GroupID)
             for (int delta_x = 0; delta_x < square_size; delta_x++)
             {
                 float accumulate = accumulated[x + y * board_width];
-                float3 color = float3(sin(accumulate) * sin(accumulate), sin(accumulate) * (1 / log(accumulate)), sin(accumulate)) * curr_board_value;
-                target_texture[int2(texture_x + delta_x, texture_y + delta_y )] = float4(color, 1.0);
+                float3 color = float3(sin(accumulate) * cos(accumulate), sin(accumulate) * (1 / log(accumulate)), sin(accumulate)) * curr_board_value;
+                target_texture[int2(texture_x + delta_x, texture_y + delta_y)] = float4(color, 1.0f);
             }
 
         }

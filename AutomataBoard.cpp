@@ -127,11 +127,10 @@ void AutomataBoard::Draw()
 	//create image from calculated buffer
 	CommandList->SetPipelineState(pipeline_to_image.Get());
 	CommandList->SetComputeRootSignature(root_signature_to_image.Get());
-	CommandList->SetComputeRootUnorderedAccessView(0, board_buffer[curr_board_buffer]->GetGPUVirtualAddress());
+	CommandList->SetComputeRootUnorderedAccessView(0, board_buffer[(curr_board_buffer + 1) % BOARD_BUFFER_COUNT]->GetGPUVirtualAddress());
 	CommandList->SetComputeRootDescriptorTable(1, screen_texture_heap->GetGPUDescriptorHandleForHeapStart());
 	CommandList->SetComputeRootConstantBufferView(2, compute_root_const->GetGPUVirtualAddress());
-	CommandList->SetComputeRootConstantBufferView(3, survive_birth_ranges->GetGPUVirtualAddress());
-	CommandList->SetComputeRootUnorderedAccessView(4, accumulated->GetGPUVirtualAddress());
+	CommandList->SetComputeRootUnorderedAccessView(3, accumulated->GetGPUVirtualAddress());
 	CommandList->ResourceBarrier(2, barriers);
 
 	CommandList->Dispatch(meta_data.dispatchX, meta_data.dispatchY, meta_data.dispatchZ);
@@ -214,12 +213,11 @@ void AutomataBoard::BuildComputeRootSignature()
 	CD3DX12_DESCRIPTOR_RANGE1 uavTable;
 	uavTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 1);
 
-	CD3DX12_ROOT_PARAMETER1 rootParametersToImage[5];
+	CD3DX12_ROOT_PARAMETER1 rootParametersToImage[4];
 	rootParametersToImage[0].InitAsUnorderedAccessView(0);
 	rootParametersToImage[1].InitAsDescriptorTable(1, &uavTable);
 	rootParametersToImage[2].InitAsConstantBufferView(0);
-	rootParametersToImage[3].InitAsConstantBufferView(1);
-	rootParametersToImage[4].InitAsUnorderedAccessView(3);
+	rootParametersToImage[3].InitAsUnorderedAccessView(3);
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureOpsDesc, rootSignatureToImageDesc;
 	rootSignatureOpsDesc.Init_1_1(_countof(rootParametersOps), rootParametersOps, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_NONE);

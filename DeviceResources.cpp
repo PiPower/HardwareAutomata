@@ -315,8 +315,9 @@ void DeviceResources::CreateSwapChain(HWND hwnd)
     swapChainDesc.Windowed = TRUE;
 
     ComPtr<IDXGISwapChain> swapChain_buffer;
-    factory->CreateSwapChain(CommandQueue.Get(), &swapChainDesc, &swapChain_buffer);
+    HRESULT hr = factory->CreateSwapChain(CommandQueue.Get(), &swapChainDesc, &swapChain_buffer);
 
+    NOT_SUCCEEDED(hr);
     NOT_SUCCEEDED(swapChain_buffer.As(&SwapChain));
 
     current_frame = SwapChain->GetCurrentBackBufferIndex();
